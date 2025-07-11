@@ -33,7 +33,9 @@
         <Message Importance="high" Text="Restoring dependencies using 'yarn'. This may take several minutes..." />
         <Exec WorkingDirectory="$(SpaRoot)" Command="yarn install" />
     </Target>
-
+    <Target Name="PreBuildSpa" BeforeTargets="Build">
+      <Exec WorkingDirectory="$(SpaRoot)" Command="yarn build" />
+    </Target>
     <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
         <Exec WorkingDirectory="$(SpaRoot)" Command="yarn install" />
         <Exec WorkingDirectory="$(SpaRoot)" Command="yarn build" />
