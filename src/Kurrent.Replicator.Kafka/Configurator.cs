@@ -5,11 +5,11 @@ namespace Kurrent.Replicator.Kafka;
 public class KafkaConfigurator(string router) : IConfigurator {
     public string Protocol => "kafka";
 
-    public IEventReader ConfigureReader(string connectionString) {
+    public IEventReader ConfigureReader(string connectionString, string? certificate, string? certificatePrivateKey) {
         throw new NotImplementedException("Kafka reader is not supported");
     }
 
-    public IEventWriter ConfigureWriter(string connectionString)
+    public IEventWriter ConfigureWriter(string connectionString, string? certificate, string? certificatePrivateKey)
         => new KafkaWriter(ParseKafkaConnection(connectionString), FunctionLoader.LoadFile(router, "Router"));
 
     static ProducerConfig ParseKafkaConnection(string connectionString) {

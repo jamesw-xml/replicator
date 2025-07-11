@@ -7,6 +7,15 @@ public record EsdbSettings {
     public string ConnectionString { get; init; }
     public string Protocol         { get; init; }
     public int    PageSize         { get; init; } = 1024;
+#nullable enable
+    public CertifcateSettings? Certificate { get; init; }
+}
+
+public record CertifcateSettings {
+#nullable enable
+    public string? CertificatePrivateKey { get; init; }
+#nullable enable
+    public string? Certificate { get; init; }
 }
 
 public record CheckpointSeeder {

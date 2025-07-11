@@ -32,14 +32,18 @@ static class Startup {
         services.AddSingleton(sp => sp.GetRequiredService<Factory>()
             .GetReader(
                 replicatorOptions.Reader.Protocol,
-                Ensure.NotEmpty(replicatorOptions.Reader.ConnectionString, "Reader connection string")
+                Ensure.NotEmpty(replicatorOptions.Reader.ConnectionString, "Reader connection string"),
+                replicatorOptions.Reader.Certificate?.Certificate,
+                replicatorOptions.Reader.Certificate?.CertificatePrivateKey
             )
         );
 
         services.AddSingleton(sp => sp.GetRequiredService<Factory>()
             .GetWriter(
                 replicatorOptions.Sink.Protocol,
-                Ensure.NotEmpty(replicatorOptions.Sink.ConnectionString, "Sink connection string")
+                Ensure.NotEmpty(replicatorOptions.Sink.ConnectionString, "Sink connection string"),
+                replicatorOptions.Reader.Certificate?.Certificate,
+                replicatorOptions.Reader.Certificate?.CertificatePrivateKey
             )
         );
 
