@@ -2,7 +2,7 @@ replicator:
   reader:
     connectionString: "esdb://admin:changeit@localhost:2113?tls=false"
     protocol: "grpc"
-    pageSize: 2048
+    pageSize: 2048        
   sink:
     connectionString: "esdb://admin:changeit@localhost:2115?tls=false"
     partitionCount: 10

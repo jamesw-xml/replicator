@@ -27,7 +27,7 @@ var fileInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Lo
 Log.Information("Starting replicator {Version}", fileInfo.ProductVersion);
 
 builder.Host.UseSerilog();
-builder.Configuration.AddYamlFile("./config/appsettings.yaml", false, true).AndEnvConfig();
+builder.Configuration.AddYamlFile("./config/appsettings.yaml", true, true).AndEnvConfig();
 Startup.ConfigureServices(builder);
 
 var app = builder.Build();

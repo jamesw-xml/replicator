@@ -26,6 +26,10 @@ public class GrpcConfigurator : IConfigurator {
             };
         }
 
+        else {
+            Console.WriteLine("No certificate provided, using insecure connection. This is not recommended for production environments.");
+        }
+
         return new(settings);
     }
 }
