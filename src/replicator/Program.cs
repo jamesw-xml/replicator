@@ -27,7 +27,12 @@ var fileInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Lo
 Log.Information("Starting replicator {Version}", fileInfo.ProductVersion);
 
 builder.Host.UseSerilog();
-builder.Configuration.AddYamlFile("./config/appsettings.yaml", true, true).AndEnvConfig();
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddYamlFile("./config/appsettings.yaml", true, true)
+    .AddEnvironmentVariables()
+    .AndEnvConfig();
 Startup.ConfigureServices(builder);
 
 var app = builder.Build();

@@ -5,6 +5,9 @@ using static Kurrent.Replicator.Shared.Observe.ReplicationMetrics;
 
 namespace replicator.HttpApi; 
 
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize]
 [Route("api/counters")]
 public class Counters(CountersKeep keep) : ControllerBase {
     CountersKeep Keep { get; } = keep;

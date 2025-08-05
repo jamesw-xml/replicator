@@ -1,6 +1,8 @@
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 #nullable disable
+using System.ComponentModel.DataAnnotations;
+
 namespace replicator.Settings;
 
 public record EsdbSettings {
@@ -63,6 +65,17 @@ public record Replicator {
     public Checkpoint        Checkpoint                      { get; init; } = new();
     public TransformSettings Transform                       { get; init; } = new();
     public Filter[]          Filters                         { get; init; }
+    public bool              EnableAuth                      { get; init; } = true;
+    public AuthSettings      Auth                           { get; init; } = new();
+}
+
+public record AuthSettings {
+    public string Username { get; init; }
+    public string Password { get; init; }
+
+    [Required]
+    [MinLength(16, ErrorMessage = "JwtSecret must be at least 16 characters long.")]
+    public string JwtSecret { get; init; } = "please_change_me_in_production";
 }
 
 public static class ConfigExtensions {

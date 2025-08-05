@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <SpaRoot>ClientApp\</SpaRoot>
@@ -6,12 +6,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.13.0" />
         <PackageReference Include="Serilog" Version="4.2.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
         <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.4" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
         <PackageReference Include="Ubiquitous.Metrics.Prometheus" Version="0.5.0" />
     </ItemGroup>
 

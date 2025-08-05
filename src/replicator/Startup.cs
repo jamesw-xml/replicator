@@ -20,11 +20,10 @@ static class Startup {
         Measurements.ConfigureMetrics(builder.Environment.EnvironmentName);
 
         var replicatorOptions = builder.Configuration.GetAs<Replicator>();
-
         var services = builder.Services;
 
         services.AddSingleton<Factory>();
-
+        services.AddSingleton(replicatorOptions);
         services.AddSingleton<IConfigurator, TcpConfigurator>(_ => new(replicatorOptions.Reader.PageSize));
         services.AddSingleton<IConfigurator, GrpcConfigurator>();
         services.AddSingleton<IConfigurator, KafkaConfigurator>(_ => new(replicatorOptions.Sink.Router));
@@ -82,6 +81,7 @@ static class Startup {
         services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
         services.AddControllers();
         services.AddCors();
+        services.AddJwtAuth(replicatorOptions.EnableAuth, replicatorOptions.Auth);
     }
 
     public static void Configure(WebApplication app) {
@@ -93,6 +93,9 @@ static class Startup {
                 cfg.AllowAnyHeader();
             }
         );
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseDefaultFiles();
         app.UseStaticFiles();
