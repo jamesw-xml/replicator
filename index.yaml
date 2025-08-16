@@ -1,0 +1,12 @@
+apiVersion: v1
+entries:
+  replicator:
+  - apiVersion: v2
+    created: "2025-08-16T17:24:44.279368352Z"
+    description: Helm chart for replicator
+    digest: 5106a7d9f121df8af57e74014fa5cf5be6bc3aae2fcc57fe1c3cba972f23894d
+    name: replicator
+    urls:
+    - https://github.com/jamesw-xml/replicator/releases/download/replicator-0.0.1/replicator-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-08-16T17:24:44.279373332Z"
