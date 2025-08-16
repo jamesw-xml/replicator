@@ -1,0 +1,36 @@
+name: Replicator / Publish Helm Chart
+on:
+  push:
+    paths:
+      - 'charts/**'
+    branches: [master]
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - 
+        name: Install Helm
+        uses: azure/setup-helm@v4
+      -  
+        name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - 
+        name: Publish Helm Chart
+        uses: helm/chart-releaser-action@v1.7.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          pages_index_path: charts/index.yaml
+        with:
+          charts_dir: charts
+          pages_branch: gh-pages

@@ -1,20 +1,35 @@
-ARG BUILDER_IMG=mcr.microsoft.com/dotnet/core/sdk:3.1.102
-ARG RUNNER_IMG=mcr.microsoft.com/dotnet/core/runtime:3.1.0
+ARG RUNNER_IMG
 
-FROM $BUILDER_IMG AS builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
+ARG TARGETARCH
 
 WORKDIR /app
 
+ARG RUNTIME
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && npm install -g yarn 
+
+COPY ./src/Directory.Build.props ./src/*/*.csproj ./src/
+RUN for file in $(ls src/*.csproj); do mkdir -p ./${file%.*}/ && mv $file ./${file%.*}/; done
+RUN dotnet restore ./src/replicator -nowarn:msb3202,nu1503 -a $TARGETARCH
+
+COPY ./src/replicator/ClientApp/package.json ./src/replicator/ClientApp/
+COPY ./src/replicator/ClientApp/yarn.lock ./src/replicator/ClientApp/
+RUN cd ./src/replicator/ClientApp && yarn install
+
+FROM builder AS publish
+ARG TARGETARCH
 COPY ./src ./src
-RUN dotnet restore -nowarn:msb3202,nu1503 src/EventStore.Shell -r linux-x64
+RUN dotnet publish ./src/replicator -c Release -a $TARGETARCH -clp:NoSummary --no-self-contained -o /app/publish
 
-RUN dotnet publish src/EventStore.Shell -c Release -r linux-x64 --no-restore --no-self-contained -clp:NoSummary -o /app/publish \
-/p:PublishReadyToRun=true,PublishSingleFile=false
-
-FROM $RUNNER_IMG AS runner
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runner
 
 WORKDIR /app
-COPY --from=builder /app/publish .
+COPY --from=publish /app/publish .
 
-ENTRYPOINT ["./EventStore.Shell"]
-CMD []
+ENV ALLOWED_HOSTS "*"
+ENV ASPNETCORE_URLS "http://*:5000"
+
+EXPOSE 5000
+ENTRYPOINT ["dotnet", "replicator.dll"]

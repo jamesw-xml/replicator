@@ -1,3 +1,5 @@
+# Local development settings (do not commit secrets)
+appsettings.Development.json
 
 # Created by https://www.gitignore.io/api/macos,csharp
 
@@ -331,3 +333,11 @@ exclusive.lck
 .vscode
 version.txt
 /public/
+**/checkpoint
+
+# Hugo Docs
+docs1/public/
+docs1/resources/
+docs1/node_modules/
+docs1/tech-doc-hugo
+docs1/.DS_Store

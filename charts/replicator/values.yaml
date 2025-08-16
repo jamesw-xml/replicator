@@ -1,0 +1,99 @@
+labels:
+  app: replicator
+deployment:
+  name: replicator
+  annotations:
+    reloader.stakater.com/auto: "true"
+  replicas: 1
+  image:
+    repository: ghcr.io/jamesw-xml/replicator/replicator
+    tag: "0.0.17"
+  container:
+    name: replicator
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+      limits:
+        memory: "300Mi"
+        cpu: "600m"
+    env:
+      ASPNETCORE_URLS: "http://*:5000"
+      ASPNETCORE_HTTP_PORT: "5000"
+      ASPNETCORE_WEBROOT: "/app/ClientApp/dist"
+      REPLICATOR__READER__CONNECTIONSTRING:
+        secretKeyRef:
+          name: mysecret
+          key: EventStore_Link
+      REPLICATOR__READER__PROTOCOL: "grpc"
+      REPLICATOR__SINK__CONNECTIONSTRING:
+        secretKeyRef:
+          name: mysecret
+          key: EventStore_Link2
+      REPLICATOR__SINK__PROTOCOL: "grpc"
+      REPLICATOR__READER__CERTIFICATE__CERTIFICATE:
+        secretKeyRef:
+          name: eventstore-grpc
+          key: tls.crt
+      REPLICATOR__READER__CERTIFICATE__CERTIFICATEPRIVATEKEY:
+        secretKeyRef:
+          name: eventstore-grpc
+          key: tls.key
+      REPLICATOR__SINK__CERTIFICATE__CERTIFICATE:
+        secretKeyRef:
+          name: eventstore-grpc
+          key: tls.crt
+      REPLICATOR__SINK__CERTIFICATE__CERTIFICATEPRIVATEKEY:
+        secretKeyRef:
+          name: eventstore-grpc
+          key: tls.key
+      REPLICATOR__SCAVENGE: "false"
+      REPLICATOR__CHECKPOINT__TYPE: "file"
+      REPLICATOR__CHECKPOINT__PATH: /app/checkpoint/checkpoint
+      REPLICATOR__CHECKPOINT__CHECKPOINTAFTER: "1000"
+    ports:
+      - containerPort: 5000
+        name: web
+    volumeMounts:
+      - name: replicator-config
+        mountPath: /app/config
+      - name: replicator-pvc
+        mountPath: /app/checkpoint
+  volumes:
+    - name: replicator-config
+      configMap:
+        name: replicator-config
+    - name: replicator-pvc
+      persistentVolumeClaim:
+        claimName: eventstore-replicator-pvc
+replicator:
+    readFromEnd: "false"
+service:
+  name: replicator
+  ports:
+    - name: web
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+pvc:
+  name: eventstore-replicator-pvc
+  accessModes:
+    - ReadWriteOnce
+  storage: 1Gi
+  storageClassName: sc-eventstore
+configmap:
+  name: replicator-config
+  data:
+    appsettings.yaml: |
+      {
+        "Replicator": {
+          "scavenge": false,
+          "filters": [],
+          "transform": null
+        }
+      }
+ingress:
+  enabled: false
+  name: replicator
+  className: apisix
+  host: replicator.local

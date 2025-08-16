@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  annotations:
+    reloader.stakater.com/auto: 'true'
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: replicator
+          image: jameswright1563/replicator
+          tag: {{ .Values.deployment.image.tag | default "v1.0" }}
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 500m
+            limits:
+              memory: 300Mi
+              cpu: 600m
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://*:5000
+            - name: ASPNETCORE_HTTP_PORT
+              value: '5000'
+            - name: ASPNETCORE_WEBROOT
+              value: /app/ClientApp/dist
+            - name: REPLICATOR__READER__CONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: EventStore_Link
+            - name: REPLICATOR__READER__PROTOCOL
+              value: grpc
+            - name: REPLICATOR__SINK__CONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: EventStore_Link2
+            - name: REPLICATOR__SINK__PROTOCOL
+              value: grpc
+            - name: REPLICATOR__READER__CERTIFICATE__CERTIFICATE
+              valueFrom:
+                secretKeyRef:
+                  name: eventstore-grpc
+                  key: tls.crt
+            - name: REPLICATOR__READER__CERTIFICATE__CERTIFICATEPRIVATEKEY
+              valueFrom:
+                secretKeyRef:
+                  name: eventstore-grpc
+                  key: tls.key
+            - name: REPLICATOR__SINK__CERTIFICATE__CERTIFICATE
+              valueFrom:
+                secretKeyRef:
+                  name: eventstore-grpc
+                  key: tls.crt
+            - name: REPLICATOR__SINK__CERTIFICATE__CERTIFICATEPRIVATEKEY
+              valueFrom:
+                secretKeyRef:
+                  name: eventstore-grpc
+                  key: tls.key
+            - name: REPLICATOR__SCAVENGE
+              value: 'false'
+            - name: REPLICATOR__CHECKPOINT__TYPE
+              value: file
+            - name: REPLICATOR__CHECKPOINT__PATH
+              value: /app/checkpoint/checkpoint
+            - name: REPLICATOR__CHECKPOINT__CHECKPOINTAFTER
+              value: '1000'
+            - name: REPLICATOR__READFROMEND
+              value: {{ .Values.replicator.readFromEnd | default "false" }}
+            - name: REPLICATOR__READFROMENDFROM
+              value: {{ .Values.replicator.readFromEndFrom | default "reader" }}
+          ports:
+            - containerPort: 5000
+              name: web
+          volumeMounts:
+            - name: replicator-config
+              mountPath: /app/config
+            - name: replicator-pvc
+              mountPath: /app/checkpoint
+      volumes:
+        - name: replicator-config
+          configMap:
+            name: replicator-config
+        - name: replicator-pvc
+          persistentVolumeClaim:
+            claimName: eventstore-replicator-pvc
