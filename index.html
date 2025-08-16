@@ -16,36 +16,52 @@
   <h1>Available Helm Charts</h1>
   <ul id="chart-list"></ul>
   <script>
-    // Change this to your repo's charts URL
-    const chartsUrl = "https://jamesw-xml.github.io/replicator/charts/";
-
-    fetch(chartsUrl)
+    // Fetch and parse index.yaml, then list chart URLs
+    fetch('index.yaml')
       .then(response => response.text())
-      .then(html => {
-        // Parse the HTML directory listing
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const links = Array.from(doc.querySelectorAll("a"))
-          .map(a => a.getAttribute("href"))
-          .filter(href => href && href.endsWith(".tgz"));
+      .then(yaml => {
+        // Simple YAML parser for the specific index.yaml structure
+        const entries = [];
+        const urlRegex = /urls:\s*\n\s*-\s*(.+)/g;
+        const nameRegex = /name:\s*(.+)/;
+        const versionRegex = /version:\s*(.+)/;
+        let match;
+        let lastName = '';
+        let lastVersion = '';
+        const lines = yaml.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          const nameMatch = lines[i].match(nameRegex);
+          if (nameMatch) lastName = nameMatch[1].trim();
+          const versionMatch = lines[i].match(versionRegex);
+          if (versionMatch) lastVersion = versionMatch[1].trim();
+          const urlMatch = lines[i].match(/-\s*(.+)/);
+          if (urlMatch && lines[i-1] && lines[i-1].includes('urls:')) {
+            entries.push({
+              name: lastName,
+              version: lastVersion,
+              url: urlMatch[1].trim()
+            });
+          }
+        }
 
-        const list = document.getElementById("chart-list");
-        links.forEach(file => {
-          const chartName = file.replace(/\\.tgz$/, "");
-          const versionMatch = file.match(/-(\\d+\\.\\d+\\.\\d+)\\.tgz$/);
-          const version = versionMatch ? versionMatch[1] : "latest";
-          const installCmd = `helm repo add myrepo ${chartsUrl}\nhelm install my-release myrepo/${chartName.split('-')[0]} --version ${version}`;
-          const li = document.createElement("li");
+        const list = document.getElementById('chart-list');
+        if (entries.length === 0) {
+          list.innerHTML = '<li>No charts found in index.yaml.</li>';
+          return;
+        }
+        entries.forEach(entry => {
+          const installCmd = `helm repo add myrepo https://jamesw-xml.github.io/replicator/charts/\nhelm install my-release myrepo/${entry.name} --version ${entry.version}`;
+          const li = document.createElement('li');
           li.innerHTML = `
-            <span class="chart-name">${chartName}</span>: 
-            <a href="${chartsUrl}${file}">${file}</a>
+            <span class="chart-name">${entry.name}</span> (${entry.version}): 
+            <a href="${entry.url}">${entry.url}</a>
             <div class="install"><pre>${installCmd}</pre></div>
           `;
           list.appendChild(li);
         });
       })
       .catch(() => {
-        document.getElementById("chart-list").innerHTML = "<li>Could not load charts directory.</li>";
+        document.getElementById('chart-list').innerHTML = '<li>Could not load index.yaml.</li>';
       });
   </script>
 </body>
