@@ -9,4 +9,12 @@ entries:
     urls:
     - https://github.com/jamesw-xml/replicator/releases/download/replicator-0.1.0/replicator-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-16T15:00:09.061767459Z"
+  - apiVersion: v2
+    created: "2025-08-16T15:33:40.771450246Z"
+    description: Helm chart for replicator
+    digest: 57d9dfe35a1ba7f0ea9f1afa6d1b2acb3f08d2aa6b92bd3c9342e6b81c119384
+    name: replicator
+    urls:
+    - https://github.com/jamesw-xml/replicator/releases/download/replicator-0.0.9/replicator-0.0.9.tgz
+    version: 0.0.9
+generated: "2025-08-16T15:33:40.771457991Z"
