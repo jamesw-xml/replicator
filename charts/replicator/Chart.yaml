@@ -2,3 +2,4 @@ apiVersion: v2
 name: replicator
 version: "0.0.1"
 description: Helm chart for replicator
+appVersion: "0.0.1"

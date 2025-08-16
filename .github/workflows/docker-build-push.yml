@@ -60,6 +60,7 @@ jobs:
             CHART_VERSION: ${{ steps.get_tag.outputs.tag }}
         run: |
             sed -i 's/^version: .*/version: \"'${CHART_VERSION}'\"/' charts/replicator/Chart.yaml
+            sed -i 's/^appVersion: .*/appVersion: \"'${CHART_VERSION}'\"/' charts/replicator/Chart.yaml
             cat charts/replicator/Chart.yaml
       - name: Commit and push updated values.yaml
         run: |
