@@ -5,6 +5,8 @@ on:
     paths-ignore:
       - 'charts/replicator/values.yaml'
       - 'charts/replicator/Chart.yaml'
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   test:
