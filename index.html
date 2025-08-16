@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Helm Charts Index</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    h1 { color: #2c3e50; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 2em; }
+    .chart-name { font-weight: bold; }
+    .install { background: #f4f4f4; padding: 0.5em; border-radius: 4px; }
+  </style>
 </head>
 <body>
   <h1>Available Helm Charts</h1>
-  <ul>
-    <li>
-      <b>replicator</b>: <a href="charts/replicator-0.0.4.tgz">replicator-0.0.4.tgz</a>
-      <br>
-      <code>helm repo add myrepo https://jamesw-xml.github.io/replicator/charts</code><br>
-      <code>helm install my-release myrepo/replicator --version 0.0.4</code>
-    </li>
-    <!-- Repeat for each chart -->
-  </ul>
+  <ul id="chart-list"></ul>
+  <script>
+    // Change this to your repo's charts URL
+    const chartsUrl = "https://jamesw-xml.github.io/replicator/charts/";
+
+    fetch(chartsUrl)
+      .then(response => response.text())
+      .then(html => {
+        // Parse the HTML directory listing
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const links = Array.from(doc.querySelectorAll("a"))
+          .map(a => a.getAttribute("href"))
+          .filter(href => href && href.endsWith(".tgz"));
+
+        const list = document.getElementById("chart-list");
+        links.forEach(file => {
+          const chartName = file.replace(/\\.tgz$/, "");
+          const versionMatch = file.match(/-(\\d+\\.\\d+\\.\\d+)\\.tgz$/);
+          const version = versionMatch ? versionMatch[1] : "latest";
+          const installCmd = `helm repo add myrepo ${chartsUrl}\nhelm install my-release myrepo/${chartName.split('-')[0]} --version ${version}`;
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span class="chart-name">${chartName}</span>: 
+            <a href="${chartsUrl}${file}">${file}</a>
+            <div class="install"><pre>${installCmd}</pre></div>
+          `;
+          list.appendChild(li);
+        });
+      })
+      .catch(() => {
+        document.getElementById("chart-list").innerHTML = "<li>Could not load charts directory.</li>";
+      });
+  </script>
 </body>
 </html>
