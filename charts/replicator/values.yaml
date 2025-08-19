@@ -1,0 +1,70 @@
+labels:
+  app: replicator
+deployment:
+  name: replicator
+  annotations:
+    reloader.stakater.com/auto: "true"
+  replicas: 1
+  image:
+    repository: ghcr.io/jamesw-xml/replicator/replicator
+    tag: "0.0.4"
+  container:
+    name: replicator
+prometheus:
+  metrics: true
+  operator: false
+terminationGracePeriodSeconds: 300
+jsConfigMaps: []
+resources:
+    requests:
+        memory: "128Mi"
+        cpu: "500m"
+    limits:
+        memory: "300Mi"
+        cpu: "600m"
+    ports:
+      - containerPort: 5000
+        name: web
+    volumeMounts:
+      - name: replicator-config
+        mountPath: /app/config
+      - name: replicator-pvc
+        mountPath: /app/checkpoint
+    volumes:
+    - name: replicator-config
+      configMap:
+        name: replicator-config
+    - name: replicator-pvc
+      persistentVolumeClaim:
+        claimName: eventstore-replicator-pvc
+replicator:
+    readFromEnd: "false"
+service:
+  name: replicator
+  ports:
+    - name: web
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+pvc:
+  name: eventstore-replicator-pvc
+  accessModes:
+    - ReadWriteOnce
+  storage: 1Gi
+  storageClassName: sc-eventstore
+configmap:
+  name: replicator-config
+  data:
+    appsettings.yaml: |
+      {
+        "Replicator": {
+          "scavenge": false,
+          "filters": [],
+          "transform": null
+        }
+      }
+ingress:
+  enabled: false
+  name: replicator
+  className: apisix
+  host: replicator.local

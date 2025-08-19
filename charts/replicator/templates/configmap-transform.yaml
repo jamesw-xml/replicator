@@ -1,0 +1,15 @@
+{{- if eq (include "replicator.shouldUseJavascriptTransform" .) "true" -}}
+apiVersion: v1
+data:
+{{ include "replicator.transform.filename" . | indent 2 }}: |-
+{{ .Values.transformJs | indent 4 }}
+
+kind: ConfigMap
+metadata:
+  name: {{ template "replicator.fullname" . }}-transform-js
+  labels:
+    app: {{ template "replicator.name" . }}
+    chart: {{ template "replicator.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- end }}

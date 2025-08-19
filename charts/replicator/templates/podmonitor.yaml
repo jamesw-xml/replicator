@@ -1,0 +1,24 @@
+{{- if and .Values.prometheus.metrics .Values.prometheus.operator }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ template "replicator.fullname" . }}
+  labels:
+    app: {{ template "replicator.name" . }}
+    chart: {{ template "replicator.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    tier: web
+spec:
+  podMetricsEndpoints:
+    - interval: 15s
+      path: /metrics
+      port: web
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: {{ template "replicator.name" . }}
+      release: {{ .Release.Name }}
+{{- end }}
